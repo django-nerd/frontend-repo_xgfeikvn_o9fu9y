@@ -1,7 +1,10 @@
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Services from './components/Services'
+import Process from './components/Process'
+import ThreeD from './components/ThreeD'
 import Testimonials from './components/Testimonials'
+import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 
 function App() {
@@ -11,7 +14,10 @@ function App() {
       <main>
         <Hero />
         <Services />
+        <Process />
+        <ThreeD />
         <Testimonials />
+        <FAQ />
         <Contact />
       </main>
       <footer className="border-t border-black/5 py-8 text-center text-sm text-gray-600">
