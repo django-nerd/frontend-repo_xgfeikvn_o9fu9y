@@ -35,7 +35,29 @@ export default function ThreeD() {
 
   const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
   const disabled = useMemo(() => (search?.get('no3d') === '1') || false, [search])
+  const forceAlt = useMemo(() => (search?.get('alt3d') === '1') || false, [search])
+  const overrideScene = useMemo(() => search?.get('scene') || '', [search])
+  const embedUrlFromQuery = useMemo(() => search?.get('embed') || '', [search])
+  const embedUrlFromEnv = typeof import.meta !== 'undefined' ? (import.meta.env.VITE_SPLINE_EMBED || '') : ''
+  const embedUrl = embedUrlFromQuery || embedUrlFromEnv
+
+  const defaultScene = 'https://prod.spline.design/4Bv2oB3hV9WB8f0j/scene.splinecode'
+  const sceneUrl = overrideScene || defaultScene
+
   const { SplineComp, error } = useSpline()
+
+  const [useIframe, setUseIframe] = useState(false)
+  useEffect(() => {
+    // If user forces alt3d or a previous error occurred, prefer iframe if available
+    if (forceAlt && embedUrl) setUseIframe(true)
+  }, [forceAlt, embedUrl])
+
+  useEffect(() => {
+    if (error) {
+      console.error('[ThreeD] Spline scene failed to load; switching to iframe fallback if configured.', error)
+      if (embedUrl) setUseIframe(true)
+    }
+  }, [error, embedUrl])
 
   const FallbackCard = ({ title = 'Interactive 3D preview unavailable' }) => (
     <div className="relative aspect-video rounded-2xl border border-blue-100 bg-white shadow-xl overflow-hidden grid place-items-center">
@@ -43,6 +65,19 @@ export default function ThreeD() {
         <div className="text-base font-semibold text-gray-900">{title}</div>
         <div className="mt-1 text-sm text-gray-600">{disabled ? '3D disabled via no3d=1' : error ? 'There was a problem loading the 3D viewer.' : 'Loading 3D…'}</div>
         <div className="mt-3 text-xs text-gray-500">You can continue browsing — this section is optional.</div>
+        {error && !embedUrl && (
+          <div className="mt-3 text-xs text-gray-500">
+            Tip: Provide an iframe share URL via ?embed=YOUR_URL or VITE_SPLINE_EMBED to use an alternate viewer.
+          </div>
+        )}
+        {error && embedUrl && !useIframe && (
+          <button
+            onClick={() => setUseIframe(true)}
+            className="mt-4 inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Try alternate 3D viewer
+          </button>
+        )}
       </div>
     </div>
   )
@@ -96,13 +131,24 @@ export default function ThreeD() {
           <div className="relative">
             {disabled ? (
               <FallbackCard title="3D preview disabled" />
+            ) : useIframe && embedUrl ? (
+              <div className="relative aspect-video rounded-2xl border border-blue-100 bg-white shadow-xl overflow-hidden">
+                <iframe
+                  title="3D viewer"
+                  src={embedUrl}
+                  className="h-full w-full"
+                  allow="autoplay; fullscreen; xr-spatial-tracking"
+                  allowFullScreen
+                  loading="lazy"
+                />
+              </div>
             ) : error ? (
               <FallbackCard />
             ) : SplineComp ? (
               <div className="relative aspect-video rounded-2xl border border-blue-100 bg-white shadow-xl overflow-hidden">
                 <Suspense fallback={<FallbackCard />}>
                   <SplineComp
-                    scene="https://prod.spline.design/4Bv2oB3hV9WB8f0j/scene.splinecode"
+                    scene={sceneUrl}
                     onLoad={() => console.log('[ThreeD] Spline loaded')}
                     onMouseDown={() => console.log('[ThreeD] user interacting')}
                   />
@@ -112,7 +158,9 @@ export default function ThreeD() {
             ) : (
               <FallbackCard />
             )}
-            <div className="mt-2 text-xs text-gray-500">Tip: append <code>?no3d=1</code> to the URL to disable this section. Append <code>?debug=1</code> to show error details.</div>
+            <div className="mt-2 text-xs text-gray-500">
+              Tip: append <code>?no3d=1</code> to disable this section. <code>?debug=1</code> to show error details. <code>?alt3d=1&embed=URL</code> to force an iframe viewer. <code>?scene=URL</code> to try a different .splinecode.
+            </div>
           </div>
         </div>
       </div>
