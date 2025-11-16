@@ -1,7 +1,13 @@
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Clock, ShieldCheck, Wrench, Truck } from 'lucide-react'
 
 export default function Process() {
+  useEffect(() => {
+    console.log('[Process] mounted')
+    return () => console.log('[Process] unmounted')
+  }, [])
+
   const steps = [
     { icon: Wrench, title: 'Diagnose', text: 'We assess the problem with pro tools and clear photos.' },
     { icon: ShieldCheck, title: 'Quote', text: 'Upfront pricing with options so you can choose.' },

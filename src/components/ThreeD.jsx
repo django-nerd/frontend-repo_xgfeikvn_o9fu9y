@@ -1,8 +1,13 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import Spline from '@splinetool/react-spline'
 import { motion } from 'framer-motion'
 
 export default function ThreeD() {
+  useEffect(() => {
+    console.log('[ThreeD] mounted')
+    return () => console.log('[ThreeD] unmounted')
+  }, [])
+
   return (
     <section id="showcase" className="relative py-24 overflow-hidden bg-gradient-to-b from-blue-50 via-white to-blue-50">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -52,7 +57,7 @@ export default function ThreeD() {
           <div className="relative aspect-video rounded-2xl border border-blue-100 bg-white shadow-xl overflow-hidden">
             <Suspense fallback={<div className="w-full h-full grid place-items-center text-gray-500">Loading 3D…</div>}>
               {/* Public demo scene from Spline */}
-              <Spline scene="https://prod.spline.design/4Bv2oB3hV9WB8f0j/scene.splinecode" />
+              <Spline scene="https://prod.spline.design/4Bv2oB3hV9WB8f0j/scene.splinecode" onLoad={() => console.log('[ThreeD] Spline loaded')} onMouseDown={() => console.log('[ThreeD] user interacting')} />
             </Suspense>
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-white/0 to-white/0" />
           </div>

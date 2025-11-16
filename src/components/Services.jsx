@@ -13,19 +13,28 @@ export default function Services() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    console.log('[Services] mounting...')
     const load = async () => {
       try {
         const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+        console.log('[Services] fetching', `${baseUrl}/api/services`)
         const res = await fetch(`${baseUrl}/api/services`)
+        if (!res.ok) {
+          console.error('[Services] fetch failed', res.status, res.statusText)
+          throw new Error(`HTTP ${res.status}`)
+        }
         const data = await res.json()
+        console.log('[Services] received', data)
         setServices(data.services || [])
       } catch (e) {
+        console.error('[Services] error', e)
         setServices([])
       } finally {
         setLoading(false)
       }
     }
     load()
+    return () => console.log('[Services] unmounted')
   }, [])
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 
 const faqs = [
@@ -22,6 +22,12 @@ const faqs = [
 
 export default function FAQ() {
   const [open, setOpen] = useState(0)
+
+  useEffect(() => {
+    console.log('[FAQ] mounted')
+    return () => console.log('[FAQ] unmounted')
+  }, [])
+
   return (
     <section id="faq" className="py-20 bg-gradient-to-b from-blue-50 to-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
